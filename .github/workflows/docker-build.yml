@@ -14,7 +14,8 @@ permissions:
   packages: write
 
 env:
-  version: "1.11.0"
+  major_version: "1.11"
+  minor_version: "0"
 
 jobs:
   build:
@@ -40,10 +41,11 @@ jobs:
           docker buildx use ${{ steps.launch_builder.outputs.name }}
           docker buildx build --push --pull\
             --platform linux/amd64,linux/arm64\
-            --build-arg VERSION=${{ env.version }}\
+            --build-arg VERSION=${{ env.major_version }}.${{ env.minor_version }}\
             --label "org.label-schema.vcs-ref=${{ github.sha }}"\
-            --label "org.label-schema.version=${{ env.version }}"\
+            --label "org.label-schema.version=${{ env.major_version }}.${{ env.minor_version }}"\
             --tag ghcr.io/jmanero/fulcrum:latest\
-            --tag ghcr.io/jmanero/fulcrum:${{ env.version }}\
-            --tag ghcr.io/jmanero/fulcrum:${{ env.version }}-${{ github.sha }}\
+            --tag ghcr.io/jmanero/fulcrum:${{ env.major_version }}\
+            --tag ghcr.io/jmanero/fulcrum:${{ env.major_version }}.${{ env.minor_version }}\
+            --tag ghcr.io/jmanero/fulcrum:${{ env.major_version }}.${{ env.minor_version }}-${{ github.sha }}\
             --file Containerfile .
