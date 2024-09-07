@@ -58,7 +58,7 @@ RUN cp -av /etc/ld.so.* /build/etc
 FROM scratch
 
 COPY --from=fetch /build /
-COPY fulcrum.conf fulcrum-banner.txt /etc
+COPY fulcrum-banner.txt /etc
 
 ENV datadir=/data
 ENV tcp=0.0.0.0:50001
