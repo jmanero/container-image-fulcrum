@@ -14,8 +14,9 @@ permissions:
   packages: write
 
 env:
-  major_version: "1.11"
-  minor_version: "0"
+  major_version: "2"
+  minor_version: "1.0"
+  platforms: linux/amd64,linux/arm64
 
 jobs:
   build:
@@ -40,7 +41,7 @@ jobs:
 
           docker buildx use ${{ steps.launch_builder.outputs.name }}
           docker buildx build --push --pull\
-            --platform linux/amd64,linux/arm64\
+            --platform ${{ env.platforms }}\
             --build-arg VERSION=${{ env.major_version }}.${{ env.minor_version }}\
             --label "org.label-schema.vcs-ref=${{ github.sha }}"\
             --label "org.label-schema.version=${{ env.major_version }}.${{ env.minor_version }}"\

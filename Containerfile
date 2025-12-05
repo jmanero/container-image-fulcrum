@@ -1,9 +1,9 @@
-ARG VERSION="1.11.0"
+ARG VERSION="2.1.0"
 
 FROM docker.io/library/fedora:latest AS fetch
 ARG VERSION
 
-RUN dnf install -y bzip2-libs
+RUN dnf install -y bzip2-libs gpg
 
 ## Handle mismatched architecture identifiers
 RUN case $(arch) in\
@@ -35,17 +35,18 @@ RUN cp -av Fulcrum /build/usr/bin/fulcrum
 # RUN cp -av FulcrumAdmin /build/usr/bin/fulcrum-admin ## This is a python script, which won't work in the scratch image
 
 ## Add the dynamic loader and library dependencies to the image
-# $ ldd /Fulcrum-1.11.0-x86_64-linux/Fulcrum
-# linux-vdso.so.1 (0x00007fff71146000)
-# libz.so.1 => /lib64/libz.so.1 (0x000070aacf274000)
-# libbz2.so.1.0 => not found
-# libdl.so.2 => /lib64/libdl.so.2 (0x000070aacf26f000)
-# libpthread.so.0 => /lib64/libpthread.so.0 (0x000070aacf26a000)
-# libm.so.6 => /lib64/libm.so.6 (0x000070aacf187000)
-# libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x000070aacf158000)
-# libc.so.6 => /lib64/libc.so.6 (0x000070aacd813000)
-# /lib64/ld-linux-x86-64.so.2 (0x000070aacf299000)
-RUN cp -aLv /usr/lib64/libz.so.1 /usr/lib64/libdl.so.2 /usr/lib64/libpthread.so.0 /usr/lib64/libm.so.6 /usr/lib64/libgcc_s.so.1 /usr/lib64/libc.so.6 /build/usr/lib64
+## ldd build/usr/bin/fulcrum
+	# linux-vdso.so.1 (0x00007ffd82ff3000)
+	# libbz2.so.1.0 => not found
+	# libz.so.1 => /lib64/libz.so.1 (0x000070d607c24000)
+	# libdl.so.2 => /lib64/libdl.so.2 (0x000070d607c20000)
+	# librt.so.1 => /lib64/librt.so.1 (0x000070d607c1c000)
+	# libpthread.so.0 => /lib64/libpthread.so.0 (0x000070d607c16000)
+	# libm.so.6 => /lib64/libm.so.6 (0x000070d607b28000)
+	# libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x000070d607afc000)
+	# libc.so.6 => /lib64/libc.so.6 (0x000070d60580e000)
+	# /lib64/ld-linux-x86-64.so.2 (0x000070d607c4b000)
+RUN cp -aLv /usr/lib64/libz.so.1 /usr/lib64/libdl.so.2 /lib64/librt.so.1 /usr/lib64/libpthread.so.0 /usr/lib64/libm.so.6 /usr/lib64/libgcc_s.so.1 /usr/lib64/libc.so.6 /build/usr/lib64
 RUN cp -aLv /usr/lib64/libbz2.so.1 /build/usr/lib64/libbz2.so.1.0
 
 ## Location of the dynamic loader varies across architectures.
@@ -59,6 +60,7 @@ FROM scratch
 
 COPY --from=fetch /build /
 COPY fulcrum-banner.txt /etc
+ENV LANG=C.UTF-8
 
 ENV datadir=/data
 ENV tcp=0.0.0.0:50001
